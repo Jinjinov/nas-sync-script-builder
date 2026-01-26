@@ -14,7 +14,12 @@ from PySide6.QtWidgets import (
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
+import yaml
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+CONFIG_FILE = BASE_DIR / "nas_sync_config.yaml"
+
 TEMPLATES_DIR = BASE_DIR / "templates"
 
 env = Environment(
@@ -94,12 +99,45 @@ class NasSyncScriptBuilder(QWidget):
         save_button.clicked.connect(self.on_save)
         main_layout.addWidget(save_button)
 
+        self.load_config()
+
+    def load_config(self):
+        if CONFIG_FILE.exists():
+            with CONFIG_FILE.open("r", encoding="utf-8") as f:
+                config = yaml.safe_load(f)
+
+            self.nas_base_path_edit.setText(config.get("nas_base_path", "//synologynas.local/Intel-i5-2500/"))
+            self.nas_username_edit.setText(config.get("nas_username", "Jinjinov"))
+            self.nas_mount_path_edit.setText(config.get("nas_mount_path", "/mnt/nas/"))
+            self.local_mount_path_edit.setText(config.get("local_mount_path", "/mnt/data/"))
+            self.exclude_edit.setPlainText("\n".join(config.get("exclude_items", DEFAULT_EXCLUDE_ITEMS)))
+
+    def save_config(self):
+        config = {
+            "nas_base_path": self.nas_base_path_edit.text(),
+            "nas_username": self.nas_username_edit.text(),
+            "nas_mount_path": self.nas_mount_path_edit.text(),
+            "local_mount_path": self.local_mount_path_edit.text(),
+            "exclude_items": [
+                line.strip()
+                for line in self.exclude_edit.toPlainText().splitlines()
+                if line.strip()
+            ],
+        }
+
+        with CONFIG_FILE.open("w", encoding="utf-8") as f:
+            yaml.safe_dump(config, f)
+
     def on_save(self):
+
+        self.save_config()
+
         exclude_items = [
             line.strip()
             for line in self.exclude_edit.toPlainText().splitlines()
             if line.strip()
         ]
+
         rendered = template.render(
             nas_base_path=self.nas_base_path_edit.text().rstrip("/") + "/",
             nas_username=self.nas_username_edit.text(),
