@@ -20,6 +20,12 @@ sudo apt install -y lsyncd cifs-utils
 # ------------------------------------------------------------------
 echo "Creating mount points..."
 
+declare -A PARTITIONS=(
+{%- for label, fstype in partitions.items() %}
+    ["{{ label }}"]="{{ fstype }}"
+{%- endfor %}
+)
+
 declare -A SYNC_DIRS=(
     ["860_Personal"]="Samsung860/D_Personal"
     ["D_Programs"]="WesternDigital/D_Programs"
@@ -69,8 +75,9 @@ if ! grep -q "NAS Sync Mounts" /etc/fstab; then
 
     LOCAL_FSTAB_ENTRIES=""
 
-    for SRC in "${!SYNC_DIRS[@]}"; do
-        LOCAL_FSTAB_ENTRIES+="LABEL=${SRC} ${MNT_LOCAL}${SRC} ntfs3 defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
+    for LABEL in "${!PARTITIONS[@]}"; do
+        FSTYPE="${PARTITIONS[$LABEL]}"
+        LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
     done
 
     NAS_FSTAB_ENTRIES=""
@@ -78,7 +85,7 @@ if ! grep -q "NAS Sync Mounts" /etc/fstab; then
     for DST in "${SYNC_DIRS[@]}"; do
         NAS="${REMOTE_BASE}${DST}"
         LOCAL="${MNT_NAS}${DST}"
-        NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,serverino,x-systemd.automount,x-systemd.mount-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
+        NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,serverino,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
     done
 
     sudo bash -c "cat >> /etc/fstab" << EOF

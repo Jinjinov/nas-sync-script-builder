@@ -29,6 +29,17 @@ env = Environment(
 )
 template = env.get_template("nas-sync.sh.tpl")
 
+DEFAULT_PARTITIONS = {
+    "860_Personal": "ntfs3",
+    "D_Programs": "ntfs3",
+    "E_Setups": "ntfs3",
+    "F_Personal": "ntfs3",
+    "G_Media": "ntfs3",
+    "H_Downloads": "ntfs3",
+    "I_Installs": "ntfs3",
+    "J_Video": "ntfs3",
+}
+
 DEFAULT_EXCLUDE_ITEMS = [
     "$RECYCLE.BIN/",
     "System Volume Information/",
@@ -144,6 +155,7 @@ class NasSyncScriptBuilder(QWidget):
             nas_mount_path=self.nas_mount_path_edit.text().rstrip("/") + "/",
             local_mount_path=self.local_mount_path_edit.text().rstrip("/") + "/",
             exclude_items=exclude_items,
+            partitions=DEFAULT_PARTITIONS,
         )
 
         output_path = BASE_DIR / "nas-sync.sh"
