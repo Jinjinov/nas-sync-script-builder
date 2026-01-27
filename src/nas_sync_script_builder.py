@@ -34,17 +34,6 @@ env = Environment(
 )
 template = env.get_template("nas-sync.sh.tpl")
 
-DEFAULT_PARTITIONS = {
-    "860_Personal": "ntfs3",
-    "D_Programs": "ntfs3",
-    "E_Setups": "ntfs3",
-    "F_Personal": "ntfs3",
-    "G_Media": "ntfs3",
-    "H_Downloads": "ntfs3",
-    "I_Installs": "ntfs3",
-    "J_Video": "ntfs3",
-}
-
 DEFAULT_EXCLUDE_ITEMS = [
     "$RECYCLE.BIN/",
     "System Volume Information/",
@@ -120,10 +109,10 @@ def detect_partitions():
         if not label:
             continue
 
-        uuid = block.get("IdUUID")
-        device = b2s(block["Device"])
-
         partitions[label] = fstype
+
+        #uuid = block.get("IdUUID")
+        #device = b2s(block["Device"])
 
         #partitions[label] = {
         #    "label": label,
