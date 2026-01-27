@@ -88,6 +88,10 @@ def detect_partitions():
     objects = udisks.GetManagedObjects()
 
     partitions = {}
+
+    def b2s(b):
+        return bytes(b).decode(errors="ignore").strip("\x00")
+    
     for path, interfaces in objects.items():
         block = interfaces.get("org.freedesktop.UDisks2.Block")
 
@@ -108,7 +112,7 @@ def detect_partitions():
 
         mounted = bool(fs and fs.get("MountPoints"))
         if mounted:
-            mountpoints = [bytes(mp).decode(errors="ignore").strip("\x00") for mp in fs["MountPoints"]]
+            mountpoints = [b2s(mp) for mp in fs["MountPoints"]]
             if any(mp in ("/", "/boot", "/usr", "/var") for mp in mountpoints):
                 continue
 
@@ -116,6 +120,8 @@ def detect_partitions():
         if not label:
             continue
 
+        uuid = block.get("IdUUID")
+        device = b2s(block["Device"])
         automount = block.get("HintAuto", False)
 
         partitions[label] = "auto"
@@ -123,6 +129,8 @@ def detect_partitions():
         #partitions[label] = {
         #    "label": label,
         #    "fstype": fstype,
+        #    "uuid": uuid,
+        #    "device": device,
         #    "automount": automount,
         #}
 
