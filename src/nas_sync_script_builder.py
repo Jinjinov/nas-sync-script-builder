@@ -135,8 +135,6 @@ def detect_partitions():
     return partitions
 
 # Add:
-# Local filesystem type per disk (ntfs3, ext4, xfs, …)
-# Local disk identifiers (labels / UUIDs)
 # Local → NAS directory mapping
 
 class NasSyncScriptBuilder(QWidget):
@@ -144,7 +142,7 @@ class NasSyncScriptBuilder(QWidget):
         super().__init__()
 
         self.setWindowTitle("NAS Configuration")
-        self.resize(600, 900)
+        self.resize(500, 1000)
 
         # Top-level vertical layout (like a StackPanel)
         main_layout = QVBoxLayout(self)
