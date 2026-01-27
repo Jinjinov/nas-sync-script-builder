@@ -9,12 +9,17 @@ from PySide6.QtWidgets import (
     QLineEdit,
     QPushButton,
     QPlainTextEdit,
+    QTableWidget,
+    QTableWidgetItem,
+    QHeaderView,
 )
 
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 import yaml
+
+from pydbus import SystemBus
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -69,6 +74,46 @@ DEFAULT_EXCLUDE_ITEMS = [
     ".vscode/",
 ]
 
+# ----------------------------
+# D-Bus partition detection
+# List partitions where:
+#   HintIgnore != true
+#   IdLabel is not empty
+#   IdType is not empty
+#   IdUsage == "filesystem"
+# ----------------------------
+def detect_partitions():
+    bus = SystemBus()
+    udisks = bus.get("org.freedesktop.UDisks2")
+    objects = udisks.GetManagedObjects()
+
+    partitions = {}
+    for path, interfaces in objects.items():
+        block = interfaces.get("org.freedesktop.UDisks2.Block")
+
+        if not block:
+            continue
+
+        fs = interfaces.get("org.freedesktop.UDisks2.Filesystem")
+
+        # Mounted?
+        mounted = bool(fs and fs.get("MountPoints"))
+
+        if mounted:
+            mountpoints = [bytes(mp).decode(errors="ignore").strip("\x00") for mp in fs["MountPoints"]]
+            if any(mp in ("/", "/boot", "/usr", "/var") for mp in mountpoints):
+                continue
+
+        label = block.get("IdLabel")
+        fstype = block.get("IdType")
+        usage = block.get("IdUsage")
+        hint_ignore = block.get("HintIgnore", False)
+
+        if not hint_ignore and label and fstype and usage == "filesystem":
+            partitions[label] = "auto"
+
+    return partitions
+
 # Add:
 # Local filesystem type per disk (ntfs3, ext4, xfs, …)
 # Local disk identifiers (labels / UUIDs)
@@ -79,7 +124,7 @@ class NasSyncScriptBuilder(QWidget):
         super().__init__()
 
         self.setWindowTitle("NAS Configuration")
-        self.resize(640, 480)
+        self.resize(600, 900)
 
         # Top-level vertical layout (like a StackPanel)
         main_layout = QVBoxLayout(self)
@@ -105,6 +150,13 @@ class NasSyncScriptBuilder(QWidget):
 
         main_layout.addLayout(form_layout)
 
+        # Partition table
+        self.partitions_table = QTableWidget()
+        self.partitions_table.setColumnCount(2)
+        self.partitions_table.setHorizontalHeaderLabels(["Label", "FSTYPE"])
+        self.partitions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        main_layout.addWidget(self.partitions_table)
+
         # Save button at the bottom
         save_button = QPushButton("Save")
         save_button.clicked.connect(self.on_save)
@@ -122,8 +174,29 @@ class NasSyncScriptBuilder(QWidget):
             self.nas_mount_path_edit.setText(config.get("nas_mount_path", "/mnt/nas/"))
             self.local_mount_path_edit.setText(config.get("local_mount_path", "/mnt/data/"))
             self.exclude_edit.setPlainText("\n".join(config.get("exclude_items", DEFAULT_EXCLUDE_ITEMS)))
+            partitions = config.get("partitions", detect_partitions())
+        else:
+            partitions = detect_partitions()
+        self.populate_partitions_table(partitions)
+
+    def populate_partitions_table(self, partitions: dict):
+        self.partitions_table.setRowCount(0)
+        for i, (label, fstype) in enumerate(partitions.items()):
+            self.partitions_table.insertRow(i)
+            self.partitions_table.setItem(i, 0, QTableWidgetItem(label))
+            self.partitions_table.setItem(i, 1, QTableWidgetItem(fstype))
+
+    def get_partitions_from_table(self):
+        partitions = {}
+        for row in range(self.partitions_table.rowCount()):
+            label_item = self.partitions_table.item(row, 0)
+            fstype_item = self.partitions_table.item(row, 1)
+            if label_item and fstype_item:
+                partitions[label_item.text().strip()] = fstype_item.text().strip()
+        return partitions
 
     def save_config(self):
+        partitions = self.get_partitions_from_table()
         config = {
             "nas_base_path": self.nas_base_path_edit.text(),
             "nas_username": self.nas_username_edit.text(),
@@ -134,6 +207,7 @@ class NasSyncScriptBuilder(QWidget):
                 for line in self.exclude_edit.toPlainText().splitlines()
                 if line.strip()
             ],
+            "partitions": partitions,
         }
 
         with CONFIG_FILE.open("w", encoding="utf-8") as f:
@@ -149,13 +223,15 @@ class NasSyncScriptBuilder(QWidget):
             if line.strip()
         ]
 
+        partitions = self.get_partitions_from_table()
+
         rendered = template.render(
             nas_base_path=self.nas_base_path_edit.text().rstrip("/") + "/",
             nas_username=self.nas_username_edit.text(),
             nas_mount_path=self.nas_mount_path_edit.text().rstrip("/") + "/",
             local_mount_path=self.local_mount_path_edit.text().rstrip("/") + "/",
             exclude_items=exclude_items,
-            partitions=DEFAULT_PARTITIONS,
+            partitions=partitions,
         )
 
         output_path = BASE_DIR / "nas-sync.sh"
