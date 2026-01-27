@@ -78,7 +78,7 @@ if ! grep -q "NAS Sync Mounts" /etc/fstab; then
     for DST in "${SYNC_DIRS[@]}"; do
         NAS="${REMOTE_BASE}${DST}"
         LOCAL="${MNT_NAS}${DST}"
-        NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,soft,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,vers=3.1.1 0 0"$'\n'
+        NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,serverino,x-systemd.automount,x-systemd.mount-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
     done
 
     sudo bash -c "cat >> /etc/fstab" << EOF
