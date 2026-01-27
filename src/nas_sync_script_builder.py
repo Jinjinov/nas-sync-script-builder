@@ -122,16 +122,14 @@ def detect_partitions():
 
         uuid = block.get("IdUUID")
         device = b2s(block["Device"])
-        automount = block.get("HintAuto", False)
 
-        partitions[label] = "auto"
+        partitions[label] = fstype
 
         #partitions[label] = {
         #    "label": label,
         #    "fstype": fstype,
         #    "uuid": uuid,
         #    "device": device,
-        #    "automount": automount,
         #}
 
     return partitions
