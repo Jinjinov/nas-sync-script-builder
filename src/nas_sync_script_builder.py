@@ -94,23 +94,37 @@ def detect_partitions():
         if not block:
             continue
 
+        if block.get("HintIgnore", False):
+            continue
+
+        if block.get("IdUsage") != "filesystem":
+            continue
+
+        fstype = block.get("IdType")
+        if not fstype:
+            continue
+
         fs = interfaces.get("org.freedesktop.UDisks2.Filesystem")
 
-        # Mounted?
         mounted = bool(fs and fs.get("MountPoints"))
-
         if mounted:
             mountpoints = [bytes(mp).decode(errors="ignore").strip("\x00") for mp in fs["MountPoints"]]
             if any(mp in ("/", "/boot", "/usr", "/var") for mp in mountpoints):
                 continue
 
         label = block.get("IdLabel")
-        fstype = block.get("IdType")
-        usage = block.get("IdUsage")
-        hint_ignore = block.get("HintIgnore", False)
+        if not label:
+            continue
 
-        if not hint_ignore and label and fstype and usage == "filesystem":
-            partitions[label] = "auto"
+        automount = block.get("HintAuto", False)
+
+        partitions[label] = "auto"
+
+        #partitions[label] = {
+        #    "label": label,
+        #    "fstype": fstype,
+        #    "automount": automount,
+        #}
 
     return partitions
 
