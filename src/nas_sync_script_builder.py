@@ -123,6 +123,10 @@ def detect_partitions():
 
     return partitions
 
+def get_sync_dirs(partitions: dict):
+    sync_dirs = {label: label for label in partitions}
+    return sync_dirs
+
 # Add:
 # Local → NAS directory mapping
 
@@ -164,6 +168,12 @@ class NasSyncScriptBuilder(QWidget):
         self.partitions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         main_layout.addWidget(self.partitions_table)
 
+        self.sync_dirs_table = QTableWidget()
+        self.sync_dirs_table.setColumnCount(2)
+        self.sync_dirs_table.setHorizontalHeaderLabels(["Local Disk Label", "NAS Path"])
+        self.sync_dirs_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        main_layout.addWidget(self.sync_dirs_table)
+
         # Save button at the bottom
         save_button = QPushButton("Save")
         save_button.clicked.connect(self.on_save)
@@ -182,9 +192,13 @@ class NasSyncScriptBuilder(QWidget):
             self.local_mount_path_edit.setText(config.get("local_mount_path", "/mnt/data/"))
             self.exclude_edit.setPlainText("\n".join(config.get("exclude_items", DEFAULT_EXCLUDE_ITEMS)))
             partitions = config.get("partitions", detect_partitions())
+            sync_dirs = config.get("sync_dirs", get_sync_dirs(partitions))
         else:
             partitions = detect_partitions()
+            sync_dirs = get_sync_dirs(partitions)
+
         self.populate_partitions_table(partitions)
+        self.populate_sync_dirs_table(sync_dirs)
 
     def populate_partitions_table(self, partitions: dict):
         self.partitions_table.setRowCount(0)
@@ -192,6 +206,13 @@ class NasSyncScriptBuilder(QWidget):
             self.partitions_table.insertRow(i)
             self.partitions_table.setItem(i, 0, QTableWidgetItem(label))
             self.partitions_table.setItem(i, 1, QTableWidgetItem(fstype))
+
+    def populate_sync_dirs_table(self, sync_dirs: dict):
+        self.sync_dirs_table.setRowCount(0)
+        for i, (local, nas_path) in enumerate(sync_dirs.items()):
+            self.sync_dirs_table.insertRow(i)
+            self.sync_dirs_table.setItem(i, 0, QTableWidgetItem(local))
+            self.sync_dirs_table.setItem(i, 1, QTableWidgetItem(nas_path))
 
     def get_partitions_from_table(self):
         partitions = {}
@@ -201,9 +222,19 @@ class NasSyncScriptBuilder(QWidget):
             if label_item and fstype_item:
                 partitions[label_item.text().strip()] = fstype_item.text().strip()
         return partitions
+    
+    def get_sync_dirs_from_table(self):
+        sync_dirs = {}
+        for row in range(self.sync_dirs_table.rowCount()):
+            local_item = self.sync_dirs_table.item(row, 0)
+            nas_item = self.sync_dirs_table.item(row, 1)
+            if local_item and nas_item:
+                sync_dirs[local_item.text().strip()] = nas_item.text().strip()
+        return sync_dirs
 
     def save_config(self):
         partitions = self.get_partitions_from_table()
+        sync_dirs = self.get_sync_dirs_from_table()
         config = {
             "nas_base_path": self.nas_base_path_edit.text(),
             "nas_username": self.nas_username_edit.text(),
@@ -215,6 +246,7 @@ class NasSyncScriptBuilder(QWidget):
                 if line.strip()
             ],
             "partitions": partitions,
+            "sync_dirs": sync_dirs,
         }
 
         with CONFIG_FILE.open("w", encoding="utf-8") as f:
@@ -231,6 +263,7 @@ class NasSyncScriptBuilder(QWidget):
         ]
 
         partitions = self.get_partitions_from_table()
+        sync_dirs = self.get_sync_dirs_from_table()
 
         rendered = template.render(
             nas_base_path=self.nas_base_path_edit.text().rstrip("/") + "/",
@@ -239,6 +272,7 @@ class NasSyncScriptBuilder(QWidget):
             local_mount_path=self.local_mount_path_edit.text().rstrip("/") + "/",
             exclude_items=exclude_items,
             partitions=partitions,
+            sync_dirs=sync_dirs,
         )
 
         output_path = BASE_DIR / "nas-sync.sh"

@@ -27,14 +27,9 @@ declare -A PARTITIONS=(
 )
 
 declare -A SYNC_DIRS=(
-    ["860_Personal"]="Samsung860/D_Personal"
-    ["D_Programs"]="WesternDigital/D_Programs"
-    ["E_Setups"]="WesternDigital/E_Setups"
-    ["F_Personal"]="WesternDigital/F_Personal"
-    ["G_Media"]="WesternDigital/G_Media"
-    ["H_Downloads"]="WesternDigital/H_Downloads"
-    ["I_Installs"]="WesternDigital/I_Installs"
-    ["J_Video"]="WesternDigital/J_Video"
+{%- for local, nas_path in sync_dirs.items() %}
+    ["{{ local }}"]="{{ nas_path }}"
+{%- endfor %}
 )
 
 MNT_LOCAL={{ local_mount_path }}
