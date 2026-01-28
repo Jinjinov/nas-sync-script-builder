@@ -57,4 +57,4 @@ def save_config(cfg: NasSyncConfig, path: Path):
         "sync_dirs": cfg.sync_dirs,
     }
     with path.open("w", encoding="utf-8") as f:
-        yaml.safe_dump(data, f, sort_keys=False)
+        yaml.safe_dump(data, f)

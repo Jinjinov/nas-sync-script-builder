@@ -4,6 +4,7 @@ import sys
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
+    QHBoxLayout,
     QVBoxLayout,
     QFormLayout,
     QLineEdit,
@@ -25,9 +26,11 @@ class NasSyncScriptBuilder(QWidget):
         super().__init__()
 
         self.setWindowTitle("NAS Configuration")
-        self.resize(500, 1000)
+        self.resize(800, 600)
 
-        main_layout = QVBoxLayout(self)
+        main_layout = QHBoxLayout(self)
+
+        form_column = QVBoxLayout()
 
         # --- Form ---
         form_layout = QFormLayout()
@@ -44,32 +47,33 @@ class NasSyncScriptBuilder(QWidget):
         form_layout.addRow("Local Mount Root:", self.local_mount_path_edit)
         form_layout.addRow("Exclude patterns:", self.exclude_edit)
 
-        main_layout.addLayout(form_layout)
+        form_column.addLayout(form_layout)
+
+        save_button = QPushButton("Generate bash script")
+        save_button.clicked.connect(self.on_save)
+        form_column.addWidget(save_button)
+
+        table_column = QVBoxLayout()
+
+        detect_button = QPushButton("Detect partitions")
+        detect_button.clicked.connect(self.on_detect_partitions)
+        table_column.addWidget(detect_button)
 
         # --- Tables ---
         self.partitions_table = QTableWidget()
         self.partitions_table.setColumnCount(2)
         self.partitions_table.setHorizontalHeaderLabels(["Label", "FSTYPE"])
         self.partitions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        main_layout.addWidget(self.partitions_table)
+        table_column.addWidget(self.partitions_table)
 
         self.sync_dirs_table = QTableWidget()
         self.sync_dirs_table.setColumnCount(2)
         self.sync_dirs_table.setHorizontalHeaderLabels(["Local Disk Label", "NAS Path"])
         self.sync_dirs_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        main_layout.addWidget(self.sync_dirs_table)
+        table_column.addWidget(self.sync_dirs_table)
 
-        # --- Buttons ---
-        buttons_layout = QVBoxLayout()
-        detect_button = QPushButton("Detect Partitions")
-        detect_button.clicked.connect(self.on_detect_partitions)
-        buttons_layout.addWidget(detect_button)
-
-        save_button = QPushButton("Generate")
-        save_button.clicked.connect(self.on_save)
-        buttons_layout.addWidget(save_button)
-
-        main_layout.addLayout(buttons_layout)
+        main_layout.addLayout(table_column)
+        main_layout.addLayout(form_column)
 
         # --- Load config ---
         self.cfg = load_config(CONFIG_FILE)
