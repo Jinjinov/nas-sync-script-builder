@@ -17,7 +17,9 @@ dependencies = [
 ]
 
 [project.scripts]
-nas-sync-script-builder = "nas_sync_script_builder.main:main"
+nas-sync-script-builder = "nas_sync_script_builder.__main__:main"
+nas-sync-script-builder-cli = "nas_sync_script_builder.cli:main"
+nas-sync-script-builder-gui = "nas_sync_script_builder.gui:main"
 
 [tool.setuptools.package-data]
 "nas_sync_script_builder" = ["templates/*.tpl"]
