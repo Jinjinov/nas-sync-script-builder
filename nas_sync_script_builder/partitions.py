@@ -2,11 +2,6 @@ from pydbus import SystemBus
 from typing import Dict
 
 def detect_partitions() -> Dict[str, str]:
-    """
-    Detect mounted or unmounted filesystem partitions using UDisks2 via D-Bus.
-    Returns a dict mapping partition label -> filesystem type.
-    Ignores system partitions like /, /boot, /usr, /var.
-    """
     bus = SystemBus()
     udisks = bus.get("org.freedesktop.UDisks2")
     objects = udisks.GetManagedObjects()
@@ -18,12 +13,14 @@ def detect_partitions() -> Dict[str, str]:
 
     for path, interfaces in objects.items():
         block = interfaces.get("org.freedesktop.UDisks2.Block")
+
         if not block:
             continue
 
         # Skip ignored devices
         if block.get("HintIgnore", False):
             continue
+
         if block.get("IdUsage") != "filesystem":
             continue
 
@@ -32,6 +29,7 @@ def detect_partitions() -> Dict[str, str]:
             continue
 
         fs = interfaces.get("org.freedesktop.UDisks2.Filesystem")
+
         mounted = bool(fs and fs.get("MountPoints"))
         if mounted:
             mountpoints = [b2s(mp) for mp in fs["MountPoints"]]
@@ -44,12 +42,18 @@ def detect_partitions() -> Dict[str, str]:
 
         partitions[label] = fstype
 
+        #uuid = block.get("IdUUID")
+        #device = b2s(block["Device"])
+
+        #partitions[label] = {
+        #    "label": label,
+        #    "fstype": fstype,
+        #    "uuid": uuid,
+        #    "device": device,
+        #}
+
     return partitions
 
 
 def get_sync_dirs(partitions: Dict[str, str]) -> Dict[str, str]:
-    """
-    Create default sync mapping: local disk label -> NAS path.
-    Initially mirrors label -> label.
-    """
     return {label: label for label in partitions}

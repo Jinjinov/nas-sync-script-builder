@@ -18,6 +18,8 @@ def main():
         cfg.sync_dirs = get_sync_dirs(cfg.partitions)
 
     script = render_script(cfg)
+    
     args.output.write_text(script + "\n")
     args.output.chmod(0o755)
+
     print(f"Script written to {args.output}")

@@ -1,10 +1,16 @@
 from jinja2 import Environment, PackageLoader
 from .config import NasSyncConfig
 
-# Use package loader for templates
+#env = Environment(
+#    loader=FileSystemLoader(Path(__file__).parent / "templates"),
+#    lstrip_blocks=False,
+#    trim_blocks=False,
+#)
 env = Environment(
     loader=PackageLoader("nas_sync_script_builder", "templates"),
-    autoescape=False  # shell scripts don't need HTML escaping
+    autoescape=False, # shell scripts don't need HTML escaping
+    lstrip_blocks=False,
+    trim_blocks=False,
 )
 
 template = env.get_template("nas-sync.sh.tpl")
