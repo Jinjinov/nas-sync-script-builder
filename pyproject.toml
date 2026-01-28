@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nas-sync-script-builder"
+version = "0.1.0"
+description = "Python GUI tool to generate NAS sync bash scripts"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6",
+    "Jinja2",
+    "PyYAML",
+    "pydbus",
+    "PyGObject"
+]
+
+[project.scripts]
+nas-sync-script-builder = "nas_sync_script_builder:main"

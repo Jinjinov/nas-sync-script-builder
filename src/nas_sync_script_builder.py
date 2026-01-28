@@ -22,14 +22,10 @@ import yaml
 
 from pydbus import SystemBus
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-
-CONFIG_FILE = BASE_DIR / "nas_sync_config.yaml"
-
-TEMPLATES_DIR = BASE_DIR / "templates"
+CONFIG_FILE = Path("nas_sync_config.yaml")
 
 env = Environment(
-    loader=FileSystemLoader(TEMPLATES_DIR),
+    loader=FileSystemLoader("./src/templates"),
     trim_blocks=False,
     lstrip_blocks=False,
 )
@@ -127,9 +123,6 @@ def detect_partitions():
 def get_sync_dirs(partitions: dict):
     sync_dirs = {label: label for label in partitions}
     return sync_dirs
-
-# Add:
-# Local → NAS directory mapping
 
 class NasSyncScriptBuilder(QWidget):
     def __init__(self):
@@ -276,13 +269,16 @@ class NasSyncScriptBuilder(QWidget):
             sync_dirs=sync_dirs,
         )
 
-        output_path = BASE_DIR / "nas-sync.sh"
+        output_path = Path("nas-sync.sh")
         output_path.write_text(rendered)
         output_path.chmod(0o755)
 
 
-if __name__ == "__main__":
+def main():
     app = QApplication(sys.argv)
     window = NasSyncScriptBuilder()
     window.show()
     sys.exit(app.exec())
+
+if __name__ == "__main__":
+    main()
