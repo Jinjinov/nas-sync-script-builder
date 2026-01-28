@@ -72,6 +72,31 @@ Check the distribution files:
 twine check dist/*
 ```
 
+Upload to TestPyPI:
+```
+twine upload --repository testpypi dist/*
+```
+
+https://test.pypi.org/project/nas-sync-script-builder/
+
+Install from TestPyPI:
+```
+pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nas-sync-script-builder
+
+```
+
+Upload to PyPI:
+```
+twine upload dist/*
+```
+
+https://pypi.org/project/nas-sync-script-builder/
+
+Install from PyPI:
+```
+pip install nas-sync-script-builder
+```
+
 ## Running the GUI
 
 ```
