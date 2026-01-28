@@ -56,6 +56,12 @@ Required by pydbus:
 pip install PyGObject
 ```
 
+Editable install:
+
+```
+pip install -e .
+```
+
 ## Running the GUI
 
 ```
