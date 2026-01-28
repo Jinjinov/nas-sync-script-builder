@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
 import sys
+from pathlib import Path
+
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -14,7 +16,6 @@ from PySide6.QtWidgets import (
     QHeaderView,
 )
 
-from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
 
 import yaml
