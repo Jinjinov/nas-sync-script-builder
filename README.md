@@ -27,9 +27,50 @@ The generated script installs these automatically:
 - lsyncd
 - cifs-utils
 
-## Python Environment
+## Running the GUI
 
-It is strongly recommended to use a virtual environment.
+Install:
+```
+pip install nas-sync-script-builder
+```
+
+Run:
+```
+nas-sync-script-builder
+```
+
+This opens the GUI where you can:
+- Review detected partitions
+- Edit filesystem types if needed
+- Configure NAS connection details
+- Customize exclude patterns
+- Adjust local → NAS directory mappings
+
+Click **Generate** to:
+- Save settings to `nas_sync_config.yaml`
+- Generate the bash script `nas-sync.sh`
+
+## Running the Generated Script
+
+```
+sudo ./nas-sync.sh
+```
+
+The script will:
+- Install required system packages
+- Prompt once for the NAS password and create `/etc/samba/credentials`
+- Create mount points for local disks and NAS shares
+- Configure mounts in `/etc/fstab`
+- Perform an initial sync
+- Configure lsyncd in `/etc/lsyncd/lsyncd.conf.lua`
+- Configure lsyncd systemd dependencies in `/etc/systemd/system/lsyncd.service.d/override.conf`
+- Configure lsyncd log rotation in `/etc/logrotate.d/lsyncd`
+- Increase inotify max_user_watches in `/etc/sysctl.d/99-inotify.conf`
+- Enable and start lsyncd
+
+## Development
+
+Use a virtual environment:
 ```
 python3 -m venv venv
 source venv/bin/activate
@@ -40,7 +81,7 @@ Install Python dependencies:
 pip install PySide6 Jinja2 PyYAML pydbus
 ```
 
-### System Dependencies for D-Bus (pydbus / PyGObject)
+System Dependencies for D-Bus (pydbus / PyGObject):
 
 Required by PyGObject:
 ```
@@ -96,38 +137,3 @@ Install from PyPI:
 ```
 pip install nas-sync-script-builder
 ```
-
-## Running the GUI
-
-```
-python3 nas_sync_script_builder.py
-```
-
-This opens the GUI where you can:
-- Review detected partitions
-- Edit filesystem types if needed
-- Configure NAS connection details
-- Customize exclude patterns
-- Adjust local → NAS directory mappings
-
-Click **Generate** to:
-- Save settings to `nas_sync_config.yaml`
-- Generate the bash script `nas-sync.sh`
-
-## Running the Generated Script
-
-```
-sudo ./nas-sync.sh
-```
-
-The script will:
-- Install required system packages
-- Prompt once for the NAS password and create `/etc/samba/credentials`
-- Create mount points for local disks and NAS shares
-- Configure mounts in `/etc/fstab`
-- Perform an initial sync
-- Configure lsyncd in `/etc/lsyncd/lsyncd.conf.lua`
-- Configure lsyncd systemd dependencies in `/etc/systemd/system/lsyncd.service.d/override.conf`
-- Configure lsyncd log rotation in `/etc/logrotate.d/lsyncd`
-- Increase inotify max_user_watches in `/etc/sysctl.d/99-inotify.conf`
-- Enable and start lsyncd
