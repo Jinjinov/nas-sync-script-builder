@@ -6,10 +6,10 @@
     "configurations": [
     
         {
-            "name": "Python Debugger: Current File",
+            "name": "Debug nas_sync_script_builder",
             "type": "debugpy",
             "request": "launch",
-            "program": "${file}",
+            "module": "nas_sync_script_builder.__main__",
             "console": "integratedTerminal"
         }
     ]
