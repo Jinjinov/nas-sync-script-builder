@@ -6,6 +6,8 @@ The script is idempotent and safe to re-run.
 
 The script sets up a one way sync with no deletions, not a mirror.
 
+[![PyPI version](https://badge.fury.io/py/nas-sync-script-builder.svg)](https://badge.fury.io/py/nas-sync-script-builder)
+
 Features:
 - Automatic detection of eligible local partitions via UDisks2 (D-Bus)
 - One-way sync only (local → NAS)
