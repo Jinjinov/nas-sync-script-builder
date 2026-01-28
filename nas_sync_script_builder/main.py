@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
     QHeaderView,
 )
 
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, PackageLoader, select_autoescape
 
 import yaml
 
@@ -24,10 +24,14 @@ from pydbus import SystemBus
 
 CONFIG_FILE = Path("nas_sync_config.yaml")
 
+#env = Environment(
+#    loader=FileSystemLoader(Path(__file__).parent / "templates"),
+#    trim_blocks=False,
+#    lstrip_blocks=False,
+#)
 env = Environment(
-    loader=FileSystemLoader(Path(__file__).parent / "templates"),
-    trim_blocks=False,
-    lstrip_blocks=False,
+    loader=PackageLoader("nas_sync_script_builder", "templates"),
+    autoescape=select_autoescape()
 )
 template = env.get_template("nas-sync.sh.tpl")
 
