@@ -17,4 +17,4 @@ dependencies = [
 ]
 
 [project.scripts]
-nas-sync-script-builder = "nas_sync_script_builder:main"
+nas-sync-script-builder = "nas_sync_script_builder.main:main"
