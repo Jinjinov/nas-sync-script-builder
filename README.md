@@ -30,14 +30,12 @@ The generated script installs these automatically:
 ## Python Environment
 
 It is strongly recommended to use a virtual environment.
-
 ```
 python3 -m venv venv
 source venv/bin/activate
 ```
 
 Install Python dependencies:
-
 ```
 pip install PySide6 Jinja2 PyYAML pydbus
 ```
@@ -45,21 +43,28 @@ pip install PySide6 Jinja2 PyYAML pydbus
 ### System Dependencies for D-Bus (pydbus / PyGObject)
 
 Required by PyGObject:
-
 ```
 sudo apt install libgirepository-2.0-dev libcairo2-dev pkg-config
 ```
 
 Required by pydbus:
-
 ```
 pip install PyGObject
 ```
 
 Editable install:
-
 ```
 pip install -e .
+```
+
+Install the build tools:
+```
+pip install build twine
+```
+
+Create the distribution files:
+```
+python -m build
 ```
 
 ## Running the GUI
