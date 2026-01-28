@@ -25,7 +25,7 @@ from pydbus import SystemBus
 CONFIG_FILE = Path("nas_sync_config.yaml")
 
 env = Environment(
-    loader=FileSystemLoader("./src/templates"),
+    loader=FileSystemLoader(Path(__file__).parent / "templates"),
     trim_blocks=False,
     lstrip_blocks=False,
 )
