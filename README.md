@@ -122,7 +122,7 @@ https://test.pypi.org/project/nas-sync-script-builder/
 
 Install from TestPyPI:
 ```
-pip install -i https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nas-sync-script-builder
+pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ nas-sync-script-builder
 
 ```
 
