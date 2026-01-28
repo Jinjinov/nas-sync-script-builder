@@ -7,19 +7,26 @@ def main():
     parser = argparse.ArgumentParser(description="Generate NAS sync script")
     parser.add_argument("-c", "--config", type=Path, default=Path("nas_sync_config.yaml"))
     parser.add_argument("-o", "--output", type=Path, default=Path("nas-sync.sh"))
-    parser.add_argument("--detect", action="store_true", help="Detect partitions automatically")
     args = parser.parse_args()
 
-    cfg = load_config(args.config)
+    if args.config.exists():
+        cfg = load_config(args.config)
 
-    if args.detect:
+        script = render_script(cfg)
+        
+        args.output.write_text(script + "\n")
+        args.output.chmod(0o755)
+
+        print(f"Script written to {args.output}")
+    else:
+        from .config import NasSyncConfig, save_config
         from .partitions import detect_partitions, get_sync_dirs
+
+        cfg = NasSyncConfig.defaults()
+
         cfg.partitions = detect_partitions()
         cfg.sync_dirs = get_sync_dirs(cfg.partitions)
 
-    script = render_script(cfg)
-    
-    args.output.write_text(script + "\n")
-    args.output.chmod(0o755)
+        save_config(cfg, args.config)
 
-    print(f"Script written to {args.output}")
+        print(f"Config written to {args.config}")
