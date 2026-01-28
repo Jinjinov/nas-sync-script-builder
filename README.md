@@ -52,6 +52,26 @@ Click **Generate** to:
 - Save settings to `nas_sync_config.yaml`
 - Generate the bash script `nas-sync.sh`
 
+## Running the CLI
+
+You can also use it without the GUI:
+
+```
+nas-sync-script-builder --cli --config path/to/config.yaml --output path/to/nas-sync.sh
+```
+
+`--cli` runs in headless mode
+
+Optional:
+
+`--config` specify the yaml config file (default: `nas_sync_config.yaml`)
+
+`--output` specify the output bash file (default: `nas-sync.sh`)
+
+If the config file exists, the bash script is generated.
+
+If the config file doesn't exist, a default config file is generated.
+
 ## Running the Generated Script
 
 ```
