@@ -67,6 +67,11 @@ Create the distribution files:
 python -m build
 ```
 
+Check the distribution files:
+```
+twine check dist/*
+```
+
 ## Running the GUI
 
 ```
