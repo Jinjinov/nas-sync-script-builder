@@ -24,7 +24,7 @@
             "request": "launch",
             "module": "nas_sync_script_builder.__main__",
             "console": "integratedTerminal",
-            "args": ["--cli", "--detect"]
+            "args": ["--cli"]
         }
     ]
 }
