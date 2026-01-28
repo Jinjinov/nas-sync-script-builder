@@ -79,7 +79,7 @@ Click **Generate** to:
 sudo ./nas-sync.sh
 ```
 
-What it will do:
+The script will:
 - Install required system packages
 - Prompt once for the NAS password and create `/etc/samba/credentials`
 - Create mount points for local disks and NAS shares
