@@ -176,7 +176,7 @@ class NasSyncScriptBuilder(QWidget):
         main_layout.addWidget(self.sync_dirs_table)
 
         # Save button at the bottom
-        save_button = QPushButton("Save")
+        save_button = QPushButton("Generate")
         save_button.clicked.connect(self.on_save)
         main_layout.addWidget(save_button)
 
