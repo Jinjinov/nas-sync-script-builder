@@ -7,7 +7,10 @@ def main():
     parser = argparse.ArgumentParser(description="Generate NAS sync script")
     parser.add_argument("-c", "--config", type=Path, default=Path("nas_sync_config.yaml"))
     parser.add_argument("-o", "--output", type=Path, default=Path("nas-sync.sh"))
-    args = parser.parse_args()
+    args, unknown = parser.parse_known_args()
+
+    if unknown:
+        print(f"Ignored unknown argument(s): {unknown}")
 
     if args.config.exists():
         cfg = load_config(args.config)
