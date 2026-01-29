@@ -62,28 +62,30 @@ sudo chmod 600 /etc/samba/credentials
 # ------------------------------------------------------------------
 echo "Configuring /etc/fstab..."
 
-if ! grep -q "NAS Sync Mounts" /etc/fstab; then
-    USER_ID=$(id -u)
-    GROUP_ID=$(id -g)
+USER_ID=$(id -u)
+GROUP_ID=$(id -g)
 
-    REMOTE_BASE={{ nas_base_path }}
+REMOTE_BASE={{ nas_base_path }}
 
-    LOCAL_FSTAB_ENTRIES=""
+LOCAL_FSTAB_ENTRIES=""
 
-    for LABEL in "${!PARTITIONS[@]}"; do
-        FSTYPE="${PARTITIONS[$LABEL]}"
-        LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
-    done
+for LABEL in "${!PARTITIONS[@]}"; do
+    FSTYPE="${PARTITIONS[$LABEL]}"
+    LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
+done
 
-    NAS_FSTAB_ENTRIES=""
+NAS_FSTAB_ENTRIES=""
 
-    for DST in "${SYNC_DIRS[@]}"; do
-        NAS="${REMOTE_BASE}${DST}"
-        LOCAL="${MNT_NAS}${DST}"
-        NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
-    done
+for DST in "${SYNC_DIRS[@]}"; do
+    NAS="${REMOTE_BASE}${DST}"
+    LOCAL="${MNT_NAS}${DST}"
+    NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
+done
 
-    sudo bash -c "cat >> /etc/fstab" << EOF
+FSTAB_BEGIN="# BEGIN nas-sync-script-builder"
+FSTAB_END="# END nas-sync-script-builder"
+
+FSTAB_BLOCK="$FSTAB_BEGIN
 
 # Local Drive Mounts
 
@@ -92,8 +94,12 @@ $LOCAL_FSTAB_ENTRIES
 # NAS Sync Mounts
 
 $NAS_FSTAB_ENTRIES
-EOF
-fi
+
+$FSTAB_END"
+
+sudo sed -i "\|$FSTAB_BEGIN|,\|$FSTAB_END|d" /etc/fstab
+sudo sed -i ':a;/^\n*$/{$d;N;ba}' /etc/fstab
+sudo bash -c "printf '\n%s\n' \"$FSTAB_BLOCK\" >> /etc/fstab"
 
 # ------------------------------------------------------------------
 # 5. Mount all configured filesystems
