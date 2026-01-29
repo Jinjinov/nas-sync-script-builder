@@ -159,3 +159,8 @@ Install from PyPI:
 ```
 pip install nas-sync-script-builder
 ```
+
+Check version:
+```
+pip show nas-sync-script-builder
+```
