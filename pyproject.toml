@@ -24,10 +24,10 @@ classifiers = [
     "Operating System :: POSIX :: Linux",
     "Topic :: System :: Archiving :: Backup"
 ]
-urls = {
-    "Homepage" = "https://github.com/Jinjinov/nas-sync-script-builder",
-    "Bug Tracker" = "https://github.com/Jinjinov/nas-sync-script-builder/issues"
-}
+
+[project.urls]
+"Homepage" = "https://github.com/Jinjinov/nas-sync-script-builder"
+"Bug Tracker" = "https://github.com/Jinjinov/nas-sync-script-builder/issues"
 
 [project.scripts]
 nas-sync-script-builder = "nas_sync_script_builder.__main__:main"
