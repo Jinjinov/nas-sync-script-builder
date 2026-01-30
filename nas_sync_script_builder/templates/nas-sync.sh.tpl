@@ -18,7 +18,7 @@ sudo apt install -y lsyncd cifs-utils
 # ------------------------------------------------------------------
 # 2. Create NAS mount points (safe to re-run)
 # ------------------------------------------------------------------
-echo "Creating mount points..."
+echo "Creating mount points for local partitions..."
 
 declare -A PARTITIONS=(
 {%- for label, fstype in partitions.items() %}
@@ -26,17 +26,19 @@ declare -A PARTITIONS=(
 {%- endfor %}
 )
 
+MNT_LOCAL={{ local_mount_path }}
+
+for LABEL in "${!PARTITIONS[@]}"; do
+    sudo mkdir -p "${MNT_LOCAL}${LABEL}"
+done
+
+echo "Creating mount points for NAS folders..."
+
 declare -A SYNC_DIRS=(
 {%- for local, nas_path in sync_dirs.items() %}
     ["{{ local }}"]="{{ nas_path }}"
 {%- endfor %}
 )
-
-MNT_LOCAL={{ local_mount_path }}
-
-for SRC in "${!SYNC_DIRS[@]}"; do
-    sudo mkdir -p "${MNT_LOCAL}${SRC}"
-done
 
 MNT_NAS={{ nas_mount_path }}
 
