@@ -144,9 +144,9 @@ for item in "${EXCLUDE_ITEMS[@]}"; do
 done
 
 # Loop through the dictionary
-for NAS_PATH in "${!PARTITION_NAS_PATHS[@]}"; do
-    SRC="${MNT_LOCAL}${NAS_PATH}/"
-    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$NAS_PATH]}/"
+for LABEL in "${!PARTITION_NAS_PATHS[@]}"; do
+    SRC="${MNT_LOCAL}${LABEL}/"
+    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$LABEL]}/"
     echo "Syncing new files from $SRC → $DST ..."
     rsync -a --update --info=progress2 "${RSYNC_EXCLUDES[@]}" "$SRC" "$DST"
 done
@@ -159,9 +159,9 @@ echo "Initial sync complete."
 echo "Creating lsyncd configuration..."
 
 SYNC_LINES=""
-for NAS_PATH in "${!PARTITION_NAS_PATHS[@]}"; do
-    SRC="${MNT_LOCAL}${NAS_PATH}/"
-    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$NAS_PATH]}/"
+for LABEL in "${!PARTITION_NAS_PATHS[@]}"; do
+    SRC="${MNT_LOCAL}${LABEL}/"
+    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$LABEL]}/"
     SYNC_LINES+="syncDir(\"$SRC\", \"$DST\")"$'\n'
 done
 
