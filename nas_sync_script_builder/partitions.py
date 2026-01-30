@@ -1,7 +1,7 @@
 from pydbus import SystemBus
 from typing import Dict
 
-def detect_partitions() -> Dict[str, str]:
+def detect_partition_fstypes() -> Dict[str, str]:
     bus = SystemBus()
     udisks = bus.get("org.freedesktop.UDisks2")
     objects = udisks.GetManagedObjects()
@@ -55,5 +55,5 @@ def detect_partitions() -> Dict[str, str]:
     return partition_fstypes
 
 
-def get_sync_dirs(partition_fstypes: Dict[str, str]) -> Dict[str, str]:
+def get_partition_nas_paths(partition_fstypes: Dict[str, str]) -> Dict[str, str]:
     return {label: label for label in partition_fstypes}

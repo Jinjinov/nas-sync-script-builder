@@ -23,12 +23,12 @@ def main():
         print(f"Script written to {args.output}")
     else:
         from .config import NasSyncConfig, save_config
-        from .partitions import detect_partitions, get_sync_dirs
+        from .partitions import detect_partition_fstypes, get_partition_nas_paths
 
         cfg = NasSyncConfig.defaults()
 
-        cfg.partition_fstypes = detect_partitions()
-        cfg.partition_nas_paths = get_sync_dirs(cfg.partition_fstypes)
+        cfg.partition_fstypes = detect_partition_fstypes()
+        cfg.partition_nas_paths = get_partition_nas_paths(cfg.partition_fstypes)
 
         save_config(cfg, args.config)
 
