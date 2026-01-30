@@ -20,15 +20,15 @@ sudo apt install -y lsyncd cifs-utils
 # ------------------------------------------------------------------
 echo "Creating mount points for local partitions..."
 
-declare -A PARTITIONS=(
-{%- for label, fstype in partitions.items() %}
+declare -A PARTITION_FSTYPES=(
+{%- for label, fstype in partition_fstypes.items() %}
     ["{{ label }}"]="{{ fstype }}"
 {%- endfor %}
 )
 
 MNT_LOCAL={{ local_mount_path }}
 
-for LABEL in "${!PARTITIONS[@]}"; do
+for LABEL in "${!PARTITION_FSTYPES[@]}"; do
     sudo mkdir -p "${MNT_LOCAL}${LABEL}"
 done
 
@@ -71,8 +71,8 @@ REMOTE_BASE={{ nas_base_path }}
 
 LOCAL_FSTAB_ENTRIES=""
 
-for LABEL in "${!PARTITIONS[@]}"; do
-    FSTYPE="${PARTITIONS[$LABEL]}"
+for LABEL in "${!PARTITION_FSTYPES[@]}"; do
+    FSTYPE="${PARTITION_FSTYPES[$LABEL]}"
     LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
 done
 

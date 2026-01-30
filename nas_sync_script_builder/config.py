@@ -12,7 +12,7 @@ class NasSyncConfig:
         local_mount_path: str,
         *,
         exclude_items: List[str] = None,
-        partitions: Dict[str, str] = None,
+        partition_fstypes: Dict[str, str] = None,
         sync_dirs: Dict[str, str] = None,
     ):
         self.nas_base_path = nas_base_path
@@ -21,7 +21,7 @@ class NasSyncConfig:
         self.local_mount_path = local_mount_path
 
         self.exclude_items = exclude_items or DEFAULT_EXCLUDE_ITEMS.copy()
-        self.partitions = partitions or {}
+        self.partition_fstypes = partition_fstypes or {}
         self.sync_dirs = sync_dirs or {}
 
     @classmethod
@@ -40,7 +40,7 @@ def load_config(path: Path) -> NasSyncConfig:
     data = yaml.safe_load(path.read_text()) or {}
     cfg = NasSyncConfig.defaults()
 
-    for key in ["nas_base_path", "nas_username", "nas_mount_path", "local_mount_path", "exclude_items", "partitions", "sync_dirs"]:
+    for key in ["nas_base_path", "nas_username", "nas_mount_path", "local_mount_path", "exclude_items", "partition_fstypes", "sync_dirs"]:
         if key in data:
             setattr(cfg, key, data[key])
 
@@ -53,7 +53,7 @@ def save_config(cfg: NasSyncConfig, path: Path):
         "nas_mount_path": cfg.nas_mount_path,
         "local_mount_path": cfg.local_mount_path,
         "exclude_items": cfg.exclude_items,
-        "partitions": cfg.partitions,
+        "partition_fstypes": cfg.partition_fstypes,
         "sync_dirs": cfg.sync_dirs,
     }
     with path.open("w", encoding="utf-8") as f:

@@ -87,7 +87,7 @@ class NasSyncScriptBuilder(QWidget):
         self.local_mount_path_edit.setText(cfg.local_mount_path)
         self.exclude_edit.setPlainText("\n".join(cfg.exclude_items))
 
-        self.populate_partitions_table(cfg.partitions)
+        self.populate_partitions_table(cfg.partition_fstypes)
         self.populate_sync_dirs_table(cfg.sync_dirs)
 
     def update_config_from_widgets(self, cfg: NasSyncConfig):
@@ -98,13 +98,13 @@ class NasSyncScriptBuilder(QWidget):
         cfg.exclude_items = [
             line.strip() for line in self.exclude_edit.toPlainText().splitlines() if line.strip()
         ]
-        cfg.partitions = self.get_partitions_from_table()
+        cfg.partition_fstypes = self.get_partitions_from_table()
         cfg.sync_dirs = self.get_sync_dirs_from_table()
 
     # ---- Table helpers ----
-    def populate_partitions_table(self, partitions: dict):
+    def populate_partitions_table(self, partition_fstypes: dict):
         self.partitions_table.setRowCount(0)
-        for i, (label, fstype) in enumerate(partitions.items()):
+        for i, (label, fstype) in enumerate(partition_fstypes.items()):
             self.partitions_table.insertRow(i)
             self.partitions_table.setItem(i, 0, QTableWidgetItem(label))
             self.partitions_table.setItem(i, 1, QTableWidgetItem(fstype))
@@ -117,13 +117,13 @@ class NasSyncScriptBuilder(QWidget):
             self.sync_dirs_table.setItem(i, 1, QTableWidgetItem(nas_path))
 
     def get_partitions_from_table(self):
-        partitions = {}
+        partition_fstypes = {}
         for row in range(self.partitions_table.rowCount()):
             label_item = self.partitions_table.item(row, 0)
             fstype_item = self.partitions_table.item(row, 1)
             if label_item and fstype_item:
-                partitions[label_item.text().strip()] = fstype_item.text().strip()
-        return partitions
+                partition_fstypes[label_item.text().strip()] = fstype_item.text().strip()
+        return partition_fstypes
 
     def get_sync_dirs_from_table(self):
         sync_dirs = {}
@@ -136,9 +136,9 @@ class NasSyncScriptBuilder(QWidget):
 
     # ---- Detect partitions ----
     def on_detect_partitions(self):
-        partitions = detect_partitions()
-        sync_dirs = get_sync_dirs(partitions)
-        self.populate_partitions_table(partitions)
+        partition_fstypes = detect_partitions()
+        sync_dirs = get_sync_dirs(partition_fstypes)
+        self.populate_partitions_table(partition_fstypes)
         self.populate_sync_dirs_table(sync_dirs)
 
     # ---- Save / Generate ----

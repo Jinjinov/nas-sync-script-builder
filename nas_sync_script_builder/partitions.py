@@ -6,7 +6,7 @@ def detect_partitions() -> Dict[str, str]:
     udisks = bus.get("org.freedesktop.UDisks2")
     objects = udisks.GetManagedObjects()
 
-    partitions: Dict[str, str] = {}
+    partition_fstypes: Dict[str, str] = {}
 
     def b2s(b: bytes) -> str:
         return bytes(b).decode(errors="ignore").strip("\x00")
@@ -40,7 +40,7 @@ def detect_partitions() -> Dict[str, str]:
         if not label:
             continue
 
-        partitions[label] = fstype
+        partition_fstypes[label] = fstype
 
         #uuid = block.get("IdUUID")
         #device = b2s(block["Device"])
@@ -52,8 +52,8 @@ def detect_partitions() -> Dict[str, str]:
         #    "device": device,
         #}
 
-    return partitions
+    return partition_fstypes
 
 
-def get_sync_dirs(partitions: Dict[str, str]) -> Dict[str, str]:
-    return {label: label for label in partitions}
+def get_sync_dirs(partition_fstypes: Dict[str, str]) -> Dict[str, str]:
+    return {label: label for label in partition_fstypes}
