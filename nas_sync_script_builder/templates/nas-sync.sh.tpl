@@ -97,8 +97,13 @@ $NAS_FSTAB_ENTRIES
 
 $FSTAB_END"
 
+# Remove previously inserted block (safe for re-runs)
 sudo sed -i "\|$FSTAB_BEGIN|,\|$FSTAB_END|d" /etc/fstab
+
+# Trim trailing empty lines to prevent newline buildup on re-runs
 sudo sed -i ':a;/^\n*$/{$d;N;ba}' /etc/fstab
+
+# Append the fstab block with one blank line before and after
 sudo bash -c "printf '\n%s\n' \"$FSTAB_BLOCK\" >> /etc/fstab"
 
 # ------------------------------------------------------------------
