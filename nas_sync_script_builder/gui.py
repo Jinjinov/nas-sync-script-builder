@@ -62,16 +62,20 @@ class NasSyncScriptBuilder(QWidget):
 
         # --- Tables ---
         self.partition_fstypes_table = QTableWidget()
-        self.partition_fstypes_table.setColumnCount(2)
-        self.partition_fstypes_table.setHorizontalHeaderLabels(["Local partition label", "File system type"])
-        self.partition_fstypes_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.partition_fstypes_table.setColumnCount(3)
+        self.partition_fstypes_table.setHorizontalHeaderLabels(["Local partition label", "File system type", ""])
+        self.partition_fstypes_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.partition_fstypes_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.partition_fstypes_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.partition_fstypes_table.verticalHeader().setVisible(False)
         table_column.addWidget(self.partition_fstypes_table)
 
         self.partition_nas_paths_table = QTableWidget()
-        self.partition_nas_paths_table.setColumnCount(2)
-        self.partition_nas_paths_table.setHorizontalHeaderLabels(["Local partition label", "NAS path"])
-        self.partition_nas_paths_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.partition_nas_paths_table.setColumnCount(3)
+        self.partition_nas_paths_table.setHorizontalHeaderLabels(["Local partition label", "NAS path", ""])
+        self.partition_nas_paths_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.partition_nas_paths_table.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        self.partition_nas_paths_table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeToContents)
         self.partition_nas_paths_table.verticalHeader().setVisible(False)
         table_column.addWidget(self.partition_nas_paths_table)
 
@@ -114,6 +118,12 @@ class NasSyncScriptBuilder(QWidget):
             self.partition_fstypes_table.setItem(i, 0, label_item)
             self.partition_fstypes_table.setItem(i, 1, QTableWidgetItem(fstype))
 
+            # Add delete button
+            delete_button = QPushButton("X")
+            delete_button.setFixedWidth(36)
+            delete_button.clicked.connect(lambda chk=False, t=self.partition_fstypes_table, b=delete_button: self.delete_row(t, b))
+            self.partition_fstypes_table.setCellWidget(i, 2, delete_button)
+
     def populate_partition_nas_paths_table(self, partition_nas_paths: dict):
         self.partition_nas_paths_table.setRowCount(0)
         for i, (label, nas_path) in enumerate(partition_nas_paths.items()):
@@ -122,6 +132,17 @@ class NasSyncScriptBuilder(QWidget):
             label_item.setFlags(label_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
             self.partition_nas_paths_table.setItem(i, 0, label_item)
             self.partition_nas_paths_table.setItem(i, 1, QTableWidgetItem(nas_path))
+
+            # Add delete button
+            delete_button = QPushButton("X")
+            delete_button.setFixedWidth(36)
+            delete_button.clicked.connect(lambda chk=False, t=self.partition_nas_paths_table, b=delete_button: self.delete_row(t, b))
+            self.partition_nas_paths_table.setCellWidget(i, 2, delete_button)
+
+    def delete_row(self, table: QTableWidget, button: QPushButton):
+        index = table.indexAt(button.pos())
+        if index.isValid():
+            table.removeRow(index.row())
 
     def get_partition_fstypes_from_table(self):
         partition_fstypes = {}
