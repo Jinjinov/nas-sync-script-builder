@@ -64,12 +64,14 @@ class NasSyncScriptBuilder(QWidget):
         self.partition_fstypes_table.setColumnCount(2)
         self.partition_fstypes_table.setHorizontalHeaderLabels(["Local partition label", "File system type"])
         self.partition_fstypes_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.partition_fstypes_table.verticalHeader().setVisible(False)
         table_column.addWidget(self.partition_fstypes_table)
 
         self.partition_nas_paths_table = QTableWidget()
         self.partition_nas_paths_table.setColumnCount(2)
         self.partition_nas_paths_table.setHorizontalHeaderLabels(["Local partition label", "NAS path"])
         self.partition_nas_paths_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.partition_nas_paths_table.verticalHeader().setVisible(False)
         table_column.addWidget(self.partition_nas_paths_table)
 
         main_layout.addLayout(table_column)
