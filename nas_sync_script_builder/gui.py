@@ -41,10 +41,10 @@ class NasSyncScriptBuilder(QWidget):
         self.exclude_edit = QPlainTextEdit()
         self.exclude_edit.setPlaceholderText("One exclude pattern per line")
 
-        form_layout.addRow("NAS Host:", self.nas_base_path_edit)
-        form_layout.addRow("NAS Username:", self.nas_username_edit)
-        form_layout.addRow("NAS Mount Root:", self.nas_mount_path_edit)
-        form_layout.addRow("Local Mount Root:", self.local_mount_path_edit)
+        form_layout.addRow("NAS base path:", self.nas_base_path_edit)
+        form_layout.addRow("NAS username:", self.nas_username_edit)
+        form_layout.addRow("NAS mount root:", self.nas_mount_path_edit)
+        form_layout.addRow("Local mount root:", self.local_mount_path_edit)
         form_layout.addRow("Exclude patterns:", self.exclude_edit)
 
         form_column.addLayout(form_layout)

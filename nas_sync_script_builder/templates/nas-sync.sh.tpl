@@ -21,8 +21,8 @@ sudo apt install -y lsyncd cifs-utils
 echo "Creating mount points for local partitions..."
 
 declare -A PARTITION_FSTYPES=(
-{%- for label, fstype in partition_fstypes.items() %}
-    ["{{ label }}"]="{{ fstype }}"
+{%- for partition, fstype in partition_fstypes.items() %}
+    ["{{ partition }}"]="{{ fstype }}"
 {%- endfor %}
 )
 
@@ -35,8 +35,8 @@ done
 echo "Creating mount points for NAS folders..."
 
 declare -A PARTITION_NAS_PATHS=(
-{%- for local, nas_path in partition_nas_paths.items() %}
-    ["{{ local }}"]="{{ nas_path }}"
+{%- for partition, nas_path in partition_nas_paths.items() %}
+    ["{{ partition }}"]="{{ nas_path }}"
 {%- endfor %}
 )
 
