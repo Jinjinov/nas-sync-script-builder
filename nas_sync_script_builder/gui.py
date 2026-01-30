@@ -1,6 +1,7 @@
 from pathlib import Path
 import sys
 
+from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
     QApplication,
     QWidget,
@@ -108,14 +109,18 @@ class NasSyncScriptBuilder(QWidget):
         self.partition_fstypes_table.setRowCount(0)
         for i, (label, fstype) in enumerate(partition_fstypes.items()):
             self.partition_fstypes_table.insertRow(i)
-            self.partition_fstypes_table.setItem(i, 0, QTableWidgetItem(label))
+            label_item = QTableWidgetItem(label)
+            label_item.setFlags(label_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            self.partition_fstypes_table.setItem(i, 0, label_item)
             self.partition_fstypes_table.setItem(i, 1, QTableWidgetItem(fstype))
 
     def populate_partition_nas_paths_table(self, partition_nas_paths: dict):
         self.partition_nas_paths_table.setRowCount(0)
         for i, (label, nas_path) in enumerate(partition_nas_paths.items()):
             self.partition_nas_paths_table.insertRow(i)
-            self.partition_nas_paths_table.setItem(i, 0, QTableWidgetItem(label))
+            label_item = QTableWidgetItem(label)
+            label_item.setFlags(label_item.flags() & ~Qt.ItemFlag.ItemIsEditable)
+            self.partition_nas_paths_table.setItem(i, 0, label_item)
             self.partition_nas_paths_table.setItem(i, 1, QTableWidgetItem(nas_path))
 
     def get_partition_fstypes_from_table(self):
