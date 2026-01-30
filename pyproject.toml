@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "nas-sync-script-builder"
 version = "0.3.0"
-description = "Python GUI tool to generate NAS sync bash scripts"
+description = "GUI tool to generate a bash script for one-way, no-deletion NAS sync using rsync and lsyncd"
 readme = "README.md"
 requires-python = ">=3.10"
 dependencies = [
