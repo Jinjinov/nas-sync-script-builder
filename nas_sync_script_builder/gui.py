@@ -25,7 +25,7 @@ class NasSyncScriptBuilder(QWidget):
     def __init__(self):
         super().__init__()
 
-        self.setWindowTitle("NAS Configuration")
+        self.setWindowTitle("NAS sync script builder")
         self.resize(800, 600)
 
         main_layout = QHBoxLayout(self)
@@ -55,20 +55,20 @@ class NasSyncScriptBuilder(QWidget):
 
         table_column = QVBoxLayout()
 
-        detect_button = QPushButton("Detect partitions")
+        detect_button = QPushButton("Detect local partitions")
         detect_button.clicked.connect(self.on_detect_partitions)
         table_column.addWidget(detect_button)
 
         # --- Tables ---
         self.partitions_table = QTableWidget()
         self.partitions_table.setColumnCount(2)
-        self.partitions_table.setHorizontalHeaderLabels(["Label", "FSTYPE"])
+        self.partitions_table.setHorizontalHeaderLabels(["Local partition label", "File system type"])
         self.partitions_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         table_column.addWidget(self.partitions_table)
 
         self.sync_dirs_table = QTableWidget()
         self.sync_dirs_table.setColumnCount(2)
-        self.sync_dirs_table.setHorizontalHeaderLabels(["Local Disk Label", "NAS Path"])
+        self.sync_dirs_table.setHorizontalHeaderLabels(["Local partition label", "NAS path"])
         self.sync_dirs_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         table_column.addWidget(self.sync_dirs_table)
 
