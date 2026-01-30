@@ -23,5 +23,5 @@ def render_script(cfg: NasSyncConfig) -> str:
         local_mount_path=cfg.local_mount_path.rstrip("/") + "/",
         exclude_items=cfg.exclude_items,
         partition_fstypes=cfg.partition_fstypes,
-        sync_dirs=cfg.sync_dirs,
+        partition_nas_paths=cfg.partition_nas_paths,
     )

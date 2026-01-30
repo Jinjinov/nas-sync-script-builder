@@ -88,7 +88,7 @@ class NasSyncScriptBuilder(QWidget):
         self.exclude_edit.setPlainText("\n".join(cfg.exclude_items))
 
         self.populate_partitions_table(cfg.partition_fstypes)
-        self.populate_sync_dirs_table(cfg.sync_dirs)
+        self.populate_sync_dirs_table(cfg.partition_nas_paths)
 
     def update_config_from_widgets(self, cfg: NasSyncConfig):
         cfg.nas_base_path = self.nas_base_path_edit.text()
@@ -99,7 +99,7 @@ class NasSyncScriptBuilder(QWidget):
             line.strip() for line in self.exclude_edit.toPlainText().splitlines() if line.strip()
         ]
         cfg.partition_fstypes = self.get_partitions_from_table()
-        cfg.sync_dirs = self.get_sync_dirs_from_table()
+        cfg.partition_nas_paths = self.get_sync_dirs_from_table()
 
     # ---- Table helpers ----
     def populate_partitions_table(self, partition_fstypes: dict):
@@ -109,9 +109,9 @@ class NasSyncScriptBuilder(QWidget):
             self.partitions_table.setItem(i, 0, QTableWidgetItem(label))
             self.partitions_table.setItem(i, 1, QTableWidgetItem(fstype))
 
-    def populate_sync_dirs_table(self, sync_dirs: dict):
+    def populate_sync_dirs_table(self, partition_nas_paths: dict):
         self.sync_dirs_table.setRowCount(0)
-        for i, (local, nas_path) in enumerate(sync_dirs.items()):
+        for i, (local, nas_path) in enumerate(partition_nas_paths.items()):
             self.sync_dirs_table.insertRow(i)
             self.sync_dirs_table.setItem(i, 0, QTableWidgetItem(local))
             self.sync_dirs_table.setItem(i, 1, QTableWidgetItem(nas_path))
@@ -126,20 +126,20 @@ class NasSyncScriptBuilder(QWidget):
         return partition_fstypes
 
     def get_sync_dirs_from_table(self):
-        sync_dirs = {}
+        partition_nas_paths = {}
         for row in range(self.sync_dirs_table.rowCount()):
             local_item = self.sync_dirs_table.item(row, 0)
             nas_item = self.sync_dirs_table.item(row, 1)
             if local_item and nas_item:
-                sync_dirs[local_item.text().strip()] = nas_item.text().strip()
-        return sync_dirs
+                partition_nas_paths[local_item.text().strip()] = nas_item.text().strip()
+        return partition_nas_paths
 
     # ---- Detect partitions ----
     def on_detect_partitions(self):
         partition_fstypes = detect_partitions()
-        sync_dirs = get_sync_dirs(partition_fstypes)
+        partition_nas_paths = get_sync_dirs(partition_fstypes)
         self.populate_partitions_table(partition_fstypes)
-        self.populate_sync_dirs_table(sync_dirs)
+        self.populate_sync_dirs_table(partition_nas_paths)
 
     # ---- Save / Generate ----
     def on_save(self):

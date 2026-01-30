@@ -34,16 +34,16 @@ done
 
 echo "Creating mount points for NAS folders..."
 
-declare -A SYNC_DIRS=(
-{%- for local, nas_path in sync_dirs.items() %}
+declare -A PARTITION_NAS_PATHS=(
+{%- for local, nas_path in partition_nas_paths.items() %}
     ["{{ local }}"]="{{ nas_path }}"
 {%- endfor %}
 )
 
 MNT_NAS={{ nas_mount_path }}
 
-for DST in "${SYNC_DIRS[@]}"; do
-    sudo mkdir -p "${MNT_NAS}${DST}"
+for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
+    sudo mkdir -p "${MNT_NAS}${NAS_PATH}"
 done
 
 # ------------------------------------------------------------------
@@ -78,9 +78,9 @@ done
 
 NAS_FSTAB_ENTRIES=""
 
-for DST in "${SYNC_DIRS[@]}"; do
-    NAS="${REMOTE_BASE}${DST}"
-    LOCAL="${MNT_NAS}${DST}"
+for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
+    NAS="${REMOTE_BASE}${NAS_PATH}"
+    LOCAL="${MNT_NAS}${NAS_PATH}"
     NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
 done
 
@@ -144,9 +144,9 @@ for item in "${EXCLUDE_ITEMS[@]}"; do
 done
 
 # Loop through the dictionary
-for DIR in "${!SYNC_DIRS[@]}"; do
-    SRC="${MNT_LOCAL}${DIR}/"
-    DST="${MNT_NAS}${SYNC_DIRS[$DIR]}/"
+for NAS_PATH in "${!PARTITION_NAS_PATHS[@]}"; do
+    SRC="${MNT_LOCAL}${NAS_PATH}/"
+    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$NAS_PATH]}/"
     echo "Syncing new files from $SRC → $DST ..."
     rsync -a --update --info=progress2 "${RSYNC_EXCLUDES[@]}" "$SRC" "$DST"
 done
@@ -159,9 +159,9 @@ echo "Initial sync complete."
 echo "Creating lsyncd configuration..."
 
 SYNC_LINES=""
-for DIR in "${!SYNC_DIRS[@]}"; do
-    SRC="${MNT_LOCAL}${DIR}/"
-    DST="${MNT_NAS}${SYNC_DIRS[$DIR]}/"
+for NAS_PATH in "${!PARTITION_NAS_PATHS[@]}"; do
+    SRC="${MNT_LOCAL}${NAS_PATH}/"
+    DST="${MNT_NAS}${PARTITION_NAS_PATHS[$NAS_PATH]}/"
     SYNC_LINES+="syncDir(\"$SRC\", \"$DST\")"$'\n'
 done
 
@@ -203,14 +203,14 @@ sudo mkdir -p /etc/systemd/system/lsyncd.service.d/
 
 REQUIRES_MOUNTS_FOR=""
 
-# Include all source directories (keys)
-for DIR in "${!SYNC_DIRS[@]}"; do
-    REQUIRES_MOUNTS_FOR+="${MNT_LOCAL}${DIR} "
+# Include mounted partitions
+for LABEL in "${!PARTITION_FSTYPES[@]}"; do
+    REQUIRES_MOUNTS_FOR+="${MNT_LOCAL}${LABEL} "
 done
 
-# Include all destination directories (values)
-for DST in "${SYNC_DIRS[@]}"; do
-    REQUIRES_MOUNTS_FOR+="${MNT_NAS}${DST} "
+# Include mounted NAS paths
+for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
+    REQUIRES_MOUNTS_FOR+="${MNT_NAS}${NAS_PATH} "
 done
 
 # Write systemd override.conf using the generated line

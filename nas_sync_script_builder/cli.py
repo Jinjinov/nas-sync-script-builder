@@ -28,7 +28,7 @@ def main():
         cfg = NasSyncConfig.defaults()
 
         cfg.partition_fstypes = detect_partitions()
-        cfg.sync_dirs = get_sync_dirs(cfg.partition_fstypes)
+        cfg.partition_nas_paths = get_sync_dirs(cfg.partition_fstypes)
 
         save_config(cfg, args.config)
 
