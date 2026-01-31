@@ -75,7 +75,7 @@ LOCAL_FSTAB_ENTRIES=""
 
 for LABEL in "${!PARTITION_FSTYPES[@]}"; do
     FSTYPE="${PARTITION_FSTYPES[$LABEL]}"
-    LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} defaults,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,nofail,x-systemd.automount 0 0"$'\n'
+    LOCAL_FSTAB_ENTRIES+="LABEL=${LABEL} ${MNT_LOCAL}${LABEL} ${FSTYPE} uid=$USER_ID,gid=$GROUP_ID,nofail 0 0"$'\n'
 done
 
 NAS_FSTAB_ENTRIES=""
@@ -83,7 +83,7 @@ NAS_FSTAB_ENTRIES=""
 for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
     NAS="${REMOTE_BASE}${NAS_PATH}"
     LOCAL="${MNT_NAS}${NAS_PATH}"
-    NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,iocharset=utf8,file_mode=0777,dir_mode=0777,_netdev,nofail,x-systemd.automount,x-systemd.mount-timeout=10,x-systemd.device-timeout=10,x-gvfs-hide,vers=3.1.1 0 0"$'\n'
+    NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,file_mode=0777,dir_mode=0777,_netdev,nofail 0 0"$'\n'
 done
 
 FSTAB_BEGIN="# BEGIN nas-sync-script-builder"
