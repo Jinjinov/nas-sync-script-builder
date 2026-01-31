@@ -1,5 +1,5 @@
 #!/bin/bash
-# setup-nas-sync.sh - Complete NAS sync setup (PC → NAS, one-way, no deletions)
+# nas-sync.sh - Complete NAS sync setup (PC → NAS, one-way, no deletions)
 # Fully safe for re-runs, mounts, and incremental syncs
 
 set -e  # Exit immediately on error
@@ -62,7 +62,7 @@ EOF
 sudo chmod 600 /etc/samba/credentials
 
 # ------------------------------------------------------------------
-# 4. Append fstab entries ONLY ONCE (dynamic UID/GID)
+# 4. Append fstab entries (dynamic UID/GID)
 # ------------------------------------------------------------------
 echo "Configuring /etc/fstab..."
 
@@ -145,7 +145,7 @@ for item in "${EXCLUDE_ITEMS[@]}"; do
     LUA_EXCLUDES+="            \"$item\","$'\n'
 done
 
-# Loop through the dictionary
+# Sync all partitions
 for LABEL in "${!PARTITION_NAS_PATHS[@]}"; do
     SRC="${MNT_LOCAL}${LABEL}/"
     DST="${MNT_NAS}${PARTITION_NAS_PATHS[$LABEL]}/"
