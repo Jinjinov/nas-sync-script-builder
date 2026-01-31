@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "nas-sync-script-builder"
-version = "0.3.0"
+version = "0.4.0"
 description = "GUI tool to generate a bash script for one-way, no-deletion NAS sync using rsync and lsyncd"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -26,8 +26,9 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/Jinjinov/nas-sync-script-builder"
-"Bug Tracker" = "https://github.com/Jinjinov/nas-sync-script-builder/issues"
+Repository = "https://github.com/Jinjinov/nas-sync-script-builder"
+Issues = "https://github.com/Jinjinov/nas-sync-script-builder/issues"
+Releases = "https://github.com/Jinjinov/nas-sync-script-builder/releases"
 
 [project.scripts]
 nas-sync-script-builder = "nas_sync_script_builder.__main__:main"
