@@ -27,7 +27,7 @@ declare -A PARTITION_FSTYPES=(
 {%- endfor %}
 )
 
-MNT_LOCAL={{ local_mount_path }}
+MNT_LOCAL="{{ local_mount_path }}"
 
 for LABEL in "${!PARTITION_FSTYPES[@]}"; do
     sudo mkdir -p "${MNT_LOCAL}${LABEL}"
@@ -42,7 +42,7 @@ declare -A PARTITION_NAS_PATHS=(
 {%- endfor %}
 )
 
-MNT_NAS={{ nas_mount_path }}
+MNT_NAS="{{ nas_mount_path }}"
 
 for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
     sudo mkdir -p "${MNT_NAS}${NAS_PATH}"
@@ -69,7 +69,7 @@ echo "Configuring /etc/fstab..."
 USER_ID=$(id -u)
 GROUP_ID=$(id -g)
 
-REMOTE_BASE={{ nas_base_path }}
+REMOTE_BASE="{{ nas_base_path }}"
 
 LOCAL_FSTAB_ENTRIES=""
 
