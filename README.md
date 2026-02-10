@@ -6,7 +6,11 @@ The script is idempotent and safe to re-run.
 
 The script sets up a one way sync with no deletions, not a mirror.
 
-[![PyPI version](https://badge.fury.io/py/nas-sync-script-builder.svg)](https://badge.fury.io/py/nas-sync-script-builder)
+[![PyPI version](https://img.shields.io/pypi/v/nas-sync-script-builder.svg)](https://pypi.org/project/nas-sync-script-builder/)
+[![PyPI downloads](https://img.shields.io/pypi/dm/nas-sync-script-builder.svg)](https://pypi.org/project/nas-sync-script-builder/)
+[![License](https://img.shields.io/github/license/Jinjinov/nas-sync-script-builder.svg)](https://github.com/Jinjinov/nas-sync-script-builder/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/Jinjinov/nas-sync-script-builder.svg)](https://github.com/Jinjinov/nas-sync-script-builder/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/Jinjinov/nas-sync-script-builder.svg)](https://github.com/Jinjinov/nas-sync-script-builder/network)
 
 Features:
 - Automatic detection of eligible local partitions via UDisks2 (D-Bus)
