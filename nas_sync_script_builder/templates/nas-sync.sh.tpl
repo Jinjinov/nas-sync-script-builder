@@ -66,8 +66,8 @@ sudo chmod 600 /etc/samba/credentials
 # ------------------------------------------------------------------
 echo "Configuring /etc/fstab..."
 
-USER_ID=$(id -u)
-GROUP_ID=$(id -g)
+USER_ID=${SUDO_UID:-$(id -u)}
+GROUP_ID=${SUDO_GID:-$(id -g)}
 
 REMOTE_BASE="{{ nas_base_path }}"
 
