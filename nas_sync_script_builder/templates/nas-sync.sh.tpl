@@ -156,7 +156,7 @@ done
 echo "Initial sync complete."
 
 # ------------------------------------------------------------------
-# 7. Create lsyncd configuration (insist=true ensures retries if NAS temporarily unavailable)
+# 7. Create lsyncd configuration
 # ------------------------------------------------------------------
 echo "Creating lsyncd configuration..."
 
@@ -306,9 +306,15 @@ sudo systemctl status lsyncd --no-pager
 # 14. Useful commands
 # ------------------------------------------------------------------
 echo
-echo "To monitor sync:"
-echo "  sudo tail -f /var/log/lsyncd/lsyncd.log"
+echo "Useful commands:"
+echo "  # check if lsyncd process is running"
+echo "  ps aux | grep [l]syncd"
+echo
+echo "  # last 500 lines of lsyncd log"
+echo "  sudo tail -n 500 /var/log/lsyncd/lsyncd.log"
+echo
+echo "  # current sync status"
 echo "  sudo cat /var/log/lsyncd/lsyncd.status"
 echo
-echo "To check mounts:"
-echo "  mount | grep synologynas"
+echo "  # last 500 lines of systemd journal"
+echo "  sudo journalctl -u lsyncd -n 500 --no-pager"
