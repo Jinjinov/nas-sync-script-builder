@@ -167,9 +167,24 @@ for LABEL in "${!PARTITION_NAS_PATHS[@]}"; do
     SYNC_LINES+="syncDir(\"$SRC\", \"$DST\")"$'\n'
 done
 
+LUA_MOUNT_CHECKS=""
+for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
+    FULL_PATH="${MNT_NAS}${NAS_PATH}"
+    LUA_MOUNT_CHECKS+="if not is_mounted(\"$FULL_PATH\") then error(\"NAS mount not available: $FULL_PATH\") end"$'\n'
+done
+
 sudo mkdir -p /etc/lsyncd
 
 sudo bash -c "cat > /etc/lsyncd/lsyncd.conf.lua" << EOF
+local function is_mounted(path)
+    local f = io.popen("mountpoint -q " .. path .. " && echo yes || echo no")
+    local result = f:read("*l")
+    f:close()
+    return result == "yes"
+end
+
+$LUA_MOUNT_CHECKS
+
 settings {
     logfile = "/var/log/lsyncd/lsyncd.log",
     statusFile = "/var/log/lsyncd/lsyncd.status",
@@ -203,23 +218,30 @@ echo "Configuring lsyncd systemd dependencies..."
 
 sudo mkdir -p /etc/systemd/system/lsyncd.service.d/
 
-REQUIRES_MOUNTS_FOR=""
+LOCAL_MOUNTS_FOR=""
 
-# Include mounted partitions
+# Include mounted partitions (RequiresMountsFor only, no BindsTo)
 for LABEL in "${!PARTITION_FSTYPES[@]}"; do
-    REQUIRES_MOUNTS_FOR+="${MNT_LOCAL}${LABEL} "
+    LOCAL_MOUNTS_FOR+="${MNT_LOCAL}${LABEL} "
 done
 
-# Include mounted NAS paths
+BINDS_TO_MOUNTS=""
+
+# Include NAS mounts as systemd unit names (for Requires= + BindsTo= + After=)
 for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
-    REQUIRES_MOUNTS_FOR+="${MNT_NAS}${NAS_PATH} "
+    FULL_PATH="${MNT_NAS}${NAS_PATH}"
+    # Convert path to systemd unit name: strip leading /, replace / with -
+    UNIT_NAME="$(echo "${FULL_PATH#/}" | tr '/' '-').mount"
+    BINDS_TO_MOUNTS+="$UNIT_NAME "
 done
 
 # Write systemd override.conf using the generated line
 sudo bash -c "cat > /etc/systemd/system/lsyncd.service.d/override.conf" << EOF
 [Unit]
-After=local-fs.target remote-fs.target network-online.target
-RequiresMountsFor=$REQUIRES_MOUNTS_FOR
+After=local-fs.target remote-fs.target network-online.target $BINDS_TO_MOUNTS
+RequiresMountsFor=$LOCAL_MOUNTS_FOR
+Requires=$BINDS_TO_MOUNTS
+BindsTo=$BINDS_TO_MOUNTS
 
 [Service]
 Restart=on-failure
