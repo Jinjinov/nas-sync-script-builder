@@ -190,7 +190,6 @@ settings {
     statusFile = "/var/log/lsyncd/lsyncd.status",
     statusInterval = 20,
     maxProcesses = 4,
-    insist = true,
 }
 
 function syncDir(sourceDir, targetDir)
