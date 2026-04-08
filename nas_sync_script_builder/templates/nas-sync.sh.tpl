@@ -219,8 +219,8 @@ $LUA_EXCLUDES
         },
         rsync = {
             archive = true,
-            size_only = true,
-            no_perms = true
+            perms = false,
+            _extra = {"--size-only"}
         }
     }
 end
