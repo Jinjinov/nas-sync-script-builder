@@ -22,6 +22,15 @@ DEFAULT_EXCLUDE_ITEMS = [
 
     ".Trash-1000/",
 
+    "*.part",
+    "*.crdownload",
+    "*.download",
+    "*.!ut",
+    "*.!qB",
+    "*.opdownload",
+    "*.incomplete",
+    "*.ytdl",
+
     ".git/",
     ".vs/",
     ".vscode/",

@@ -13,6 +13,8 @@ echo
 echo "Installing packages..."
 
 sudo apt update
+# lsyncd:     monitors directories for changes and triggers rsync automatically in real-time
+# cifs-utils: provides tools to mount Windows/SMB network shares (needed for NAS CIFS mounts)
 sudo apt install -y lsyncd cifs-utils
 
 # ------------------------------------------------------------------
@@ -80,10 +82,16 @@ done
 
 NAS_FSTAB_ENTRIES=""
 
+# _netdev: tells systemd this is a network device mount, so it waits for the network before mounting
+# nofail:  don't halt boot if the NAS is unreachable
+# noac:    disables CIFS attribute caching so rsync always reads fresh timestamps from the NAS.
+#          Without this, the CIFS client caches stale timestamps (the rename time instead of the
+#          original mtime), causing rsync to think files differ and re-upload them on every restart.
+
 for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
     NAS="${REMOTE_BASE}${NAS_PATH}"
     LOCAL="${MNT_NAS}${NAS_PATH}"
-    NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,file_mode=0777,dir_mode=0777,_netdev,nofail 0 0"$'\n'
+    NAS_FSTAB_ENTRIES+="$NAS $LOCAL cifs credentials=/etc/samba/credentials,uid=$USER_ID,gid=$GROUP_ID,file_mode=0777,dir_mode=0777,_netdev,nofail,noac 0 0"$'\n'
 done
 
 FSTAB_BEGIN="# BEGIN nas-sync-script-builder"
@@ -125,7 +133,7 @@ sudo mount -a
 echo "Syncing files to NAS..."
 
 # ------------------------------------------------------------------
-# rsync excludes
+# rsync excludes for former Windows / NTFS partitions
 # ------------------------------------------------------------------
 EXCLUDE_ITEMS=(
 {%- for item in exclude_items %}
@@ -146,11 +154,17 @@ for item in "${EXCLUDE_ITEMS[@]}"; do
 done
 
 # Sync all partitions
+# -a:             archive mode: recursive, preserves symlinks, timestamps, owner, group
+# --update:       skip files where the destination is newer than the source
+# --size-only:    skip files where size matches, ignoring timestamps (CIFS timestamps are unreliable)
+# --no-perms:     don't sync Unix permissions (CIFS ignores them anyway, reports false differences)
+# --info=progress2: show overall transfer progress instead of per-file
+
 for LABEL in "${!PARTITION_NAS_PATHS[@]}"; do
     SRC="${MNT_LOCAL}${LABEL}/"
     DST="${MNT_NAS}${PARTITION_NAS_PATHS[$LABEL]}/"
     echo "Syncing new files from $SRC → $DST ..."
-    rsync -a --update --info=progress2 "${RSYNC_EXCLUDES[@]}" "$SRC" "$DST"
+    rsync -a --update --size-only --no-perms --info=progress2 "${RSYNC_EXCLUDES[@]}" "$SRC" "$DST"
 done
 
 echo "Initial sync complete."
@@ -174,6 +188,8 @@ for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
 done
 
 sudo mkdir -p /etc/lsyncd
+
+# never delete files on NAS even if deleted on PC with "delete = false"
 
 sudo bash -c "cat > /etc/lsyncd/lsyncd.conf.lua" << EOF
 local function is_mounted(path)
@@ -202,7 +218,9 @@ function syncDir(sourceDir, targetDir)
 $LUA_EXCLUDES
         },
         rsync = {
-            archive = true
+            archive = true,
+            size_only = true,
+            no_perms = true
         }
     }
 end
@@ -234,7 +252,13 @@ for NAS_PATH in "${PARTITION_NAS_PATHS[@]}"; do
     BINDS_TO_MOUNTS+="$UNIT_NAME "
 done
 
-# Write systemd override.conf using the generated line
+# Write systemd override.conf using the generated lines
+
+# After=              start lsyncd only after network, local drives, and NAS mounts are up
+# RequiresMountsFor=  ensure local NTFS drives are mounted before starting
+# Requires=           if any NAS mount unit stops, stop lsyncd too
+# BindsTo=            stronger than Requires=: if a NAS mount drops mid-run, stop lsyncd immediately
+
 sudo bash -c "cat > /etc/systemd/system/lsyncd.service.d/override.conf" << EOF
 [Unit]
 After=local-fs.target remote-fs.target network-online.target $BINDS_TO_MOUNTS
@@ -258,6 +282,13 @@ sudo mkdir -p /var/log/lsyncd
 # 10. Configure log rotation for lsyncd
 # ------------------------------------------------------------------
 echo "Creating logrotate configuration for lsyncd..."
+
+# weekly:       rotate logs once a week
+# rotate 4:     keep 4 weeks of logs
+# compress:     gzip rotated logs
+# missingok:    don't error if log file is missing
+# notifempty:   don't rotate empty logs
+# copytruncate: copy then truncate instead of renaming (safe for running processes)
 
 sudo bash -c 'cat > /etc/logrotate.d/lsyncd' << 'EOF'
 /var/log/lsyncd/*.log /var/log/lsyncd/*.status {
