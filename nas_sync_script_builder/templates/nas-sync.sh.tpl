@@ -255,9 +255,11 @@ done
 # Write systemd override.conf using the generated lines
 
 # After=              start lsyncd only after network, local drives, and NAS mounts are up
-# RequiresMountsFor=  ensure local NTFS drives are mounted before starting
-# Requires=           if any NAS mount unit stops, stop lsyncd too
-# BindsTo=            stronger than Requires=: if a NAS mount drops mid-run, stop lsyncd immediately
+# RequiresMountsFor=  ensure local drives are mounted before starting
+# Requires=           declare dependency on NAS mount units, but does not stop lsyncd if a mount drops mid-run
+# BindsTo=            if a NAS mount drops mid-run, stop lsyncd immediately
+#                     with this, if NAS mount is not up (e.g. PC boots before NAS after a power outage), lsyncd will not start
+#                     without this, lsyncd would sync into the empty mountpoint directory on the local drive, filling up the partition
 
 sudo bash -c "cat > /etc/systemd/system/lsyncd.service.d/override.conf" << EOF
 [Unit]
