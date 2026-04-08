@@ -133,7 +133,7 @@ sudo mount -a
 echo "Syncing files to NAS..."
 
 # ------------------------------------------------------------------
-# rsync excludes for former Windows / NTFS partitions
+# rsync excludes
 # ------------------------------------------------------------------
 EXCLUDE_ITEMS=(
 {%- for item in exclude_items %}
